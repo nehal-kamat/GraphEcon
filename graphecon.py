@@ -8,32 +8,66 @@ import numpy as np
 
 
 class Utility(object):
-
-    def __init__(self):
-        pass
+    """"Return the max utility, used for both lineal and non lineal"""
+    def __init__(self, weights):
+        self.weights = weights
 
     def bestPurchase(self, price_vec, budget):
-        #self.price_vec = price_vec
-        #self.budget = budget
-        pass
+        quantity=[]
+        for n in range(0, len(price_vec)):
+            quantity.append(budget/price_vec[n])
+        utilities= [eval(self.weights, {'math': math, '__builtins__': None}, {'x': value})
+                for value, self.weights in zip(quantity, self.weights)]
+        i = np.argmax(utilities)
+        x = np.zeros(price_vec.shape)
+        x[i]=utilities[i]
+        return x
+
+                
 
 class LinearUtility(Utility):
 
     def __init__(self, weights):
         self.weights = weights
 
+    
     def bestPurchase(self, price_vec, budget):
+        #Calculate best purchase for linear, given a price vector and the budget
+        #return the index of the maximum
         i = np.argmax(self.weights/price_vec)
         x = np.zeros(price_vec.shape)
         x[i] = budget/price_vec[i]
-
+        
         return x
+       
+  
+    '''
+    def bestPurchase(self, price_vec, budget):
+        #other method, returns max utility
+        for n in range(0, len(price_vec)):
+            price_vec[n]=budget/price_vec[n]
+        x = np.zeros(price_vec.shape)
+        index = np.argmax(price_vec)
+        x[index]=price_vec[index]*self.weights[index]
+       
+        return x
+    '''
+   
 
 class NonLinearUtility(Utility):
 
     def __init__(self, weights):
         self.weights = weights
 
+    def bestPurchase(self, values, budget):
+        #self.price_vec = price_vec
+        #self.budget = budget
+        
+        return [eval(self.weights, {'math': math, '__builtins__': None}, {'x': value})
+                for value, self.weights in zip(values, self.weights)]
+       
+        
+        
 ###########
 def gen_data(G, numItems):
     numNodes = nx.number_of_nodes(G)
