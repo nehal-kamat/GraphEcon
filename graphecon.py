@@ -59,12 +59,10 @@ class NonLinearUtility(Utility):
     def __init__(self, weights):
         self.weights = weights
 
-    def bestPurchase(self, values, budget):
-        #self.price_vec = price_vec
-        #self.budget = budget
+    #def bestPurchase(self, price_vec, budget):
         
-        return [eval(self.weights, {'math': math, '__builtins__': None}, {'x': value})
-                for value, self.weights in zip(values, self.weights)]
+        #return [eval(self.weights, {'math': math, '__builtins__': None}, {'x': value})
+                #for value, self.weights in zip(price_vec, self.weights)]
        
         
         
