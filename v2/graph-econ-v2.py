@@ -64,7 +64,8 @@ def main():
                 continue
 
     nx.draw(G, with_labels = True)
-    plt.savefig("InitialGraph.png")
+    plt.show()
+    #plt.savefig("InitialGraph.png")
 
     endowment = {0:np.array([1,2]), 1:np.array([1,1]), 2:np.array([2,1])}
     utility = {0:LinearUtility(np.array([1,0])), 1:LinearUtility(np.array([1,1])), 2:LinearUtility(np.array([0,1]))}
