@@ -34,13 +34,19 @@ class NonLinearUtility:
         return x
 
 class market:
-    def __init__(G, utility, endowment):
+    def __init__(self, G, utility, endowment):
         self.G = G.copy()
         self.utility = utility
         self.endowment = endowment
 
-    def checkClear(prices):
-        pass
+    def checkClear(self, prices):
+        self.prices = prices
+        for n in self.G:
+            self.G.node[n]['prices'] = prices[n]
+        budget = {}
+        for x in range(self.G.number_of_nodes()):
+            budget[x] = sum(self.prices[x]*self.endowment[x])
+
 
 def main():
     G = nx.Graph()
@@ -60,11 +66,12 @@ def main():
     nx.draw(G, with_labels = True)
     plt.savefig("InitialGraph.png")
 
-    endowments = {0:[1,2], 1:[1,1], 2:[2,1]}
-    utility = {0:LinearUtility(1,0), 1:LinearUtility(1,1), 2:LinearUtility(0,1)}
+    endowment = {0:np.array([1,2]), 1:np.array([1,1]), 2:np.array([2,1])}
+    utility = {0:LinearUtility(np.array([1,0])), 1:LinearUtility(np.array([1,1])), 2:LinearUtility(np.array([0,1]))}
 
     mkt = market(G, utility, endowment)
-    prices = {}
+
+    prices = {0:np.array([2,1]), 1:np.array([2,2]), 2:np.array([1,2])}
     mkt.checkClear(prices)
 
 if __name__ == "__main__":
