@@ -42,19 +42,17 @@ class market:
     def checkClear(self, prices):
         self.prices = prices
         for n in self.G:
-            self.G.node[n]['prices'] = prices[n] 
+            self.G.node[n]['prices'] = prices[n]
         budget = {}
         for x in range(self.G.number_of_nodes()):
             budget[x] = sum(self.prices[x]*self.endowment[x])
-    
-    def bestPrices(self, prices):
-        self.prices=prices
+
+        """searching for neighbours having the best prices for goods"""
         best_prices = {}
         for n in self.G: #iterate though the nodes of graph
-            best_prices[n] = {} 
+            best_prices[n] = {}
             for good in range(0, len(self.endowment[n])): #iterate though the goods of a node
-                best_prices[n][good]=[]
-                min_price = self.prices[n][good]
+                best_prices[n][good]=[], min_price = self.prices[n][good]
                 best_prices[n][good].append(str(min_price))
                 best_prices[n][good].append(n)
                 for neighbor in self.G.neighbors(n): #iterate though the nodes of graph
@@ -65,10 +63,6 @@ class market:
                         best_prices[n][good]=[]
                         best_prices[n][good].append(str(min_price))
                         best_prices[n][good].append(neighbor)
-      
-        return best_prices
-        
-        
 
 
 def main():
@@ -96,8 +90,7 @@ def main():
     mkt = market(G, utility, endowment)
 
     prices = {0:np.array([2,1]), 1:np.array([2,2]), 2:np.array([1,2])}
-    mkt.checkClear(prices)
-    print mkt.bestPrices(prices)
+    print mkt.checkClear(prices)
 
 if __name__ == "__main__":
     main()
