@@ -52,7 +52,8 @@ class market:
         for n in self.G: #iterate though the nodes of graph
             best_prices[n] = {}
             for good in range(0, len(self.endowment[n])): #iterate though the goods of a node
-                best_prices[n][good]=[], min_price = self.prices[n][good]
+                best_prices[n][good]=[]
+                min_price = self.prices[n][good]
                 best_prices[n][good].append(str(min_price))
                 best_prices[n][good].append(n)
                 for neighbor in self.G.neighbors(n): #iterate though the nodes of graph
@@ -64,10 +65,15 @@ class market:
                         best_prices[n][good].append(str(min_price))
                         best_prices[n][good].append(neighbor)
 
+        print "budget: {}\nbest prices: {}".format(budget, best_prices)
+
 
 def main():
     G = nx.Graph()
     numNodes = 3 #int(raw_input("Enter the number of nodes to be included in the graph: "))
+    G.add_edges_from([(0,1),(1,2)])
+    """
+    # ask user for presence or absence of edges between pairs of nodes
     print "Print 1 for YES and 0 for NO"
     for x in xrange(numNodes-1):
         for y in xrange(1,numNodes):
@@ -79,7 +85,7 @@ def main():
                 G.add_edge(x,y)
             else:
                 continue
-
+    """
     nx.draw(G, with_labels = True)
     plt.show()
     #plt.savefig("InitialGraph.png")
