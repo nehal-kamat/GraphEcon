@@ -18,15 +18,19 @@ class LinearUtility:
         tmp = np.argmax(candidate_set)
         temp = candidate_set[tmp]
         best_index = np.where(candidate_set==temp)
-        if len(best_index[0]>1):
+        best_index = best_index[0].tolist()
+        #best_index = ','.join(map(int, best_index[0][0]))
+        #best_index = np.array(best_index.tolist())
+        print best_index
+        if len(best_index)==1:
+            x = np.zeros(price_vec.shape)
+            x[tmp] = budget/price_vec[tmp]
+            return x.tolist()
+        else:
             rng = budget/price_vec[tmp]
             num = [p for p in range(0, rng+1)]
-            combinations = itertools.product(num, repeat=len(best_index[0]))
-            x = [c for c in combinations if reduce(lambda x, y: x + y, list(c)) == rng]
-        else:
-            i = tmp
-            x = np.zeros(price_vec.shape)
-            x[i] = budget/price_vec[i]
+            combinations = itertools.product(num, repeat=len(best_index))
+            x = [c for c in combinations if reduce(lambda x, y: x + y, c) == rng]
         return x
 
 class NonLinearUtility:
@@ -95,10 +99,18 @@ class market:
 
         best_purchase = {}
         for n in self.G:
-            best_purchase[n] = []
-            best_purchase[n].append(self.utility[n].bestPurchase(keys[n], budget[n]))
+            best_purchase[n] = {}
+            best_purchase[n] = self.utility[n].bestPurchase(keys[n], budget[n])
 
         print best_purchase
+
+        for n in best_purchase:
+            if len(best_purchase[n]) > len(self.endowment[n]):
+                feasibility = {}
+                for t in best_purchase[n]:
+                    feasibility[t] = []
+                    for item in t:
+                        if item <=
 
 
         """
