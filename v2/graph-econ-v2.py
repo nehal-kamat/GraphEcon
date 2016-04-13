@@ -51,19 +51,24 @@ class market:
         best_prices = {}
         for n in self.G: #iterate though the nodes of graph
             best_prices[n] = {}
+            neighbor_track=[]
             for good in range(0, len(self.endowment[n])): #iterate though the goods of a node
-                best_prices[n][good]=[]
+                best_prices[n][good]={}
                 min_price = self.prices[n][good]
-                best_prices[n][good].append(str(min_price))
-                best_prices[n][good].append(n)
+                best_prices[n][good][str(min_price)] = []
+                best_prices[n][good][str(min_price)].append(n)
                 for neighbor in self.G.neighbors(n): #iterate though the nodes of graph
                     if self.prices[neighbor][good] == min_price: #if price of good X of neighbor y == min->add to list (tie)
-                        best_prices[n][good].append(neighbor)
+                        best_prices[n][good][str(min_price)].append(neighbor)
                     if self.prices[neighbor][good] < min_price: #if price of good X of neighbor y < create new list
                         min_price = self.prices[neighbor][good]
-                        best_prices[n][good]=[]
-                        best_prices[n][good].append(str(min_price))
-                        best_prices[n][good].append(neighbor)
+                        best_prices[n][good]={}
+                        best_prices[n][good][str(min_price)] = []
+                        best_prices[n][good][str(min_price)].append(neighbor)
+                        
+                for key in best_prices[n][good]:
+                    neighbor_track.append(best_prices[n][good][key])
+            print neighbor_track
 
         print "budget: {}\nbest prices: {}".format(budget, best_prices)
 
@@ -96,7 +101,7 @@ def main():
     mkt = market(G, utility, endowment)
 
     prices = {0:np.array([2,1]), 1:np.array([2,2]), 2:np.array([1,2])}
-    print mkt.checkClear(prices)
+    mkt.checkClear(prices)
 
 if __name__ == "__main__":
     main()
