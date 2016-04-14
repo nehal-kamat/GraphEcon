@@ -91,6 +91,9 @@ class market:
 
                 for key in best_prices[n][good]:
                     keys[n].append(key)
+
+                self.G.node[n]['best neighbours'] = best_prices[n][good][min_price]
+
                     #neighbor_track[n].append(best_prices[n][good][key])
 
             #print neighbor_track[n]
@@ -110,7 +113,11 @@ class market:
                 for t in best_purchase[n]:
                     feasibility[t] = []
                     for item in t:
-                        if item <=
+                        if item > all(best_prices[n][item][key for key in best_prices[n][item]]):
+                            feasibility[t].append(0)
+                        else:
+                            feasibility.append(1)
+                print feasibility
 
 
         """
