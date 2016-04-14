@@ -5,15 +5,33 @@ import itertools
 import math
 import numpy as np
 
+
 class LinearUtility:
     def __init__(self, weights):
-        self.weights = np.array(map(float, weights))
+        self.weights = weights
 
     def bestPurchase(self, price_vec, budget):
-        i = np.argmax(self.weights/np.array(map(float,price_vec)))
-        x = np.zeros(price_vec.shape)
-        x[i] = budget/price_vec[i]
+        price_vec = np.array(price_vec)
+        #i.append(np.argmax(np.array(map(float, self.weights))/np.array(map(float,price_vec))))
 
+        best_index = []
+        candidate_set = np.array(map(float, self.weights))/np.array(map(float,price_vec))
+        tmp = np.argmax(candidate_set)
+        temp = candidate_set[tmp]
+        best_index = np.where(candidate_set==temp)
+        best_index = best_index[0].tolist()
+        #best_index = ','.join(map(int, best_index[0][0]))
+        #best_index = np.array(best_index.tolist())
+        print best_index
+        if len(best_index)==1:
+            x = np.zeros(price_vec.shape)
+            x[tmp] = budget/price_vec[tmp]
+            return [tuple(x)]
+        else:
+            rng = budget/price_vec[tmp]
+            num = [p for p in range(0, rng+1)]
+            combinations = itertools.product(num, repeat=len(best_index))
+            x = [c for c in combinations if reduce(lambda x, y: x + y, c) == rng]
         return x
 
 class NonLinearUtility:
@@ -47,30 +65,88 @@ class market:
         for x in range(self.G.number_of_nodes()):
             budget[x] = sum(self.prices[x]*self.endowment[x])
 
+
+
         """searching for neighbours having the best prices for goods"""
         best_prices = {}
+        neighbor_track={}
+        keys={}
         for n in self.G: #iterate though the nodes of graph
             best_prices[n] = {}
-            neighbor_track=[]
+            neighbor_track[n] = []
+            keys[n] = []
             for good in range(0, len(self.endowment[n])): #iterate though the goods of a node
                 best_prices[n][good]={}
                 min_price = self.prices[n][good]
-                best_prices[n][good][str(min_price)] = []
-                best_prices[n][good][str(min_price)].append(n)
+                best_prices[n][good][min_price] = []
+                best_prices[n][good][min_price].append(n)
                 for neighbor in self.G.neighbors(n): #iterate though the nodes of graph
                     if self.prices[neighbor][good] == min_price: #if price of good X of neighbor y == min->add to list (tie)
-                        best_prices[n][good][str(min_price)].append(neighbor)
+                        best_prices[n][good][min_price].append(neighbor)
                     if self.prices[neighbor][good] < min_price: #if price of good X of neighbor y < create new list
                         min_price = self.prices[neighbor][good]
                         best_prices[n][good]={}
-                        best_prices[n][good][str(min_price)] = []
-                        best_prices[n][good][str(min_price)].append(neighbor)
-                        
+                        best_prices[n][good][min_price] = []
+                        best_prices[n][good][min_price].append(neighbor)
+
+
                 for key in best_prices[n][good]:
-                    neighbor_track.append(best_prices[n][good][key])
-            print neighbor_track
+                    keys[n].append(key)
+                    #neighbor_track[n].append(best_prices[n][good][key])
+
+            #print neighbor_track[n]
 
         print "budget: {}\nbest prices: {}".format(budget, best_prices)
+
+        best_purchase = {}
+        for n in self.G:
+            best_purchase[n] = {}
+            best_purchase[n] = self.utility[n].bestPurchase(keys[n], budget[n])
+
+        print best_purchase
+
+
+        combinations = list(itertools.product(*(best_purchase[n] for n in best_purchase)))
+
+        """
+        for n in best_purchase:
+            if len(best_purchase[n]) > len(self.endowment[n]):
+                feasibility = {}
+                for t in best_purchase[n]:
+                    feasibility[t] = []
+                    for item in t:
+                        if item <=
+        """
+
+
+
+        """
+        for n in self.G:
+            combn = list(itertools.product(*neighbor_track[n]))
+            best_purchase = []
+            for item in combn:
+                pv = []
+                for i, ii in enumerate(item):
+                    pv.append(self.G.node[ii]['prices'][i])
+                best_purchase.append(self.utility[n].bestPurchase(pv, budget[n]))
+                #best_purchase.sort()
+            print best_purchase
+        """
+
+
+
+    def distance(self, scenario):
+        """calculates the distance to equilibrium"""
+        supply = 0
+        demand = 0
+        for node in self.G:
+            supply += sum(self.endowment[node])
+            demand += sum(scenario[node])
+
+        return supply - demand
+
+
+
 
 
 def main():
@@ -92,16 +168,17 @@ def main():
                 continue
     """
     nx.draw(G, with_labels = True)
-    plt.show()
+    #plt.show()
     #plt.savefig("InitialGraph.png")
 
     endowment = {0:np.array([1,2]), 1:np.array([1,1]), 2:np.array([2,1])}
-    utility = {0:LinearUtility(np.array([1,0])), 1:LinearUtility(np.array([1,1])), 2:LinearUtility(np.array([0,1]))}
+    utility = {0:LinearUtility([1,0]), 1:LinearUtility([1,1]), 2:LinearUtility([0,1])}
 
     mkt = market(G, utility, endowment)
 
     prices = {0:np.array([2,1]), 1:np.array([2,2]), 2:np.array([1,2])}
     mkt.checkClear(prices)
+
 
 if __name__ == "__main__":
     main()
