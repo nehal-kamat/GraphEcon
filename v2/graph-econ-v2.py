@@ -92,14 +92,65 @@ class Market:
         # format of best_prices, best_neighbours : {node: {good : ...}}
         print "budget: {}\nbest prices: {}\nbest neighbours: {}".format(budget, best_prices, best_neighbours)
 
-        return keys, budget
+        # return keys, budget
 
-    def bestPurchase(self, keys, budget):
         best_purchase = {}
         for n in self.G:
             best_purchase[n] = {}
             best_purchase[n] = self.utility[n].bestPurchase(keys[n], budget[n])
         print "purchase candidates: ", best_purchase
+
+        # return best_purchase
+
+        final_purchase = {}
+        for n in self.G:
+            final_purchase[n] = []
+            print type(best_purchase[n][0])
+            if type(best_purchase[n][0])!=tuple:
+                bn = zip(best_purchase[n], self.G.node[n]['best neighbours'])
+                bn = [list(x) for x in bn]
+                for item in bn:
+                    temp=[]
+                    for ii in item[1]:
+                        if item[0] > self.endowment[ii][bn.index(item)]:
+                            temp.append(self.endowment[ii][bn.index(item)])
+                            diff = item[0] - self.endowment[ii][bn.index(item)]
+                            # print diff
+                            item[0]=diff
+                            if ii==len(item[1])-1 and diff!=0:
+                                remaining = diff
+                        else:
+                            temp.append(item[0])
+                    final_purchase[n].append(temp)
+
+            elif type(best_purchase[n][0])==tuple:
+                for tup in best_purchase[n]:
+                    bn = zip(tup, self.G.node[n]['best neighbours'])
+                    bn = [list(x) for x in bn]
+                    print bn
+                    remaining = [0]*len(bn)
+                    temp=[]
+                    for item in bn:
+                        for ii in item[1]:
+                            if item[0] > self.endowment[ii][bn.index(item)]:
+                                temp.append(self.endowment[ii][bn.index(item)])
+                                diff = item[0] - self.endowment[ii][bn.index(item)]
+                                remaining[bn.index(item)]=diff
+                                item[0]=diff
+                                # if ii==len(item[1])-1 and diff!=0:
+                                #     remaining[bn.index(item)]=diff
+                            else:
+                                temp.append(item[0])
+                    print temp
+                    print remaining
+                    if remaining==[0 for x in range(len(remaining))]:
+                        print "yes"
+                        final_purchase[n].append(temp)
+                        # print rem
+
+        print "final purchase: {}".format(final_purchase)
+
+    # def bestPurchase(self, keys, budget):
 
 
 def main():
@@ -116,8 +167,10 @@ def main():
     mkt = Market(G, utility, endowment)
 
     prices = {0:np.array([2,1]), 1:np.array([2,2]), 2:np.array([1,2])}
-    best_prices, budget = mkt.bestPrices(prices)
-    mkt.bestPurchase(best_prices, budget)
+
+    mkt.bestPrices(prices)
+    # best_prices, budget     = mkt.bestPrices(prices)
+    # best_purchase           = mkt.bestPurchase(best_prices, budget)
 
 if __name__ == "__main__":
     main()
