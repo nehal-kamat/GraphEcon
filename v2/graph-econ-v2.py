@@ -5,6 +5,7 @@ from itertools import product, permutations, combinations
 import math
 import numpy as np
 import numdifftools as nd
+from scipy import optimize
 
 
 class Utility:
@@ -98,6 +99,8 @@ class Market:
         end_rav = [item for sublist in end_rav for item in sublist]
         self.end_rav = end_rav
 
+        # print self.end_rav
+
         prices_rav = [np.ravel(price_mat[i], order='F') for i in range(nnodes)]
         prices_rav = [item for sublist in prices_rav for item in sublist]
         self.prices_rav = prices_rav
@@ -108,30 +111,43 @@ class Market:
 
         def l(i,j,k):
             avg = len(self.end_rav) / nnodes
-            out = []
-            last = 0.0
-            while last < len(self.end_rav):
-                out.append(self.end_rav[int(last):int(last+avg)])
-                last += avg
-            avg2 = len(out[i]) / ngoods
-            out2 = []
-            last2 = 0.0
-            while last2 < len(out[i]):
-                out2.append(out[i][int(last2):int(last2+avg2)])
-                last2 +=avg2
+            countj = j
+            countk = k*nnodes
+            counti = avg*i
 
-            return out2[k-1][j]
+            # out = []
+            # last = 0.0
+            # while last < len(self.end_rav):
+            #     out.append(self.end_rav[int(last):int(last+avg)])
+            #     last += avg
+            # avg2 = len(out[i]) / ngoods
+            # out2 = []
+            # last2 = 0.0
+            # while last2 < len(out[i]):
+            #     out2.append(out[i][int(last2):int(last2+avg2)])
+            #     last2 +=avg2
 
-        func = [(endowment[i][k]**2 - 2*endowment[i][k]*sum([l(j,i,k) for j in range(nnodes)]) + (sum([l(j,i,k) for j in range(nnodes)]))**2) for i in range(nnodes) for k in range(ngoods)]
+            return counti + countk + countj
 
-        func = np.array(func)
+        # func = [(endowment[i][k]**2 - 2*endowment[i][k]*sum([l(j,i,k) for j in range(nnodes)]) + (sum([l(j,i,k) for j in range(nnodes)]))**2) for i in range(nnodes) for k in range(ngoods)]
 
-        # print l(1,2,2)
+        fun = lambda x: sum([(sum([x[l(j,i,k)] for j in range(nnodes)]))**2 - 2*endowment[i][k]*sum([x[l(j,i,k)] for j in range(nnodes)]) + endowment[i][k]**2 for i in range(nnodes) for k in range(ngoods)])
 
-        A = np.zeros((2*nnodes, len(self.end_rav)))
-        B = np.array([4.0, 4.0, 4.0, -2.0, -2.0, -2.0])
+        # print fun
+        temp = []
+        for i in range(nnodes):
+            for k in range(ngoods):
+                for j in range(nnodes):
+                    temp.append(l(j,i,k))
+
+        print temp
+
+        A = np.zeros((nnodes, len(self.end_rav)))
+        A2 = np.zeros((nnodes, len(self.end_rav)))
+        B = np.array([4.0, 4.0, 4.0])
+        B2 = np.array([-2.0, -2.0, -2.0])
+
         # print B.shape
-        B = [item for item in np.ravel(B)]
 
         div = len(self.end_rav) / nnodes
 
@@ -141,10 +157,12 @@ class Market:
             start = start + div
 
         start = 0
-        for i in range(nnodes, 2*nnodes):
-            A[i][start : start + div] = self.util_rav[start : start + div]
+        for i in range(0, nnodes):
+            A2[i][start : start + div] = self.util_rav[start : start + div]
             start = start + div
 
+        # print A
+        # print A2
 
         def hessian(x):
             """
@@ -166,14 +184,40 @@ class Market:
 
             return hessian
 
-        M = hessian(func)
-        print M
 
-        # print hessian(A)
-        # print A
-        # H = nd.Hessian('forward')
-        # print H(A)
+        H = np.zeros((18, 18), int)
+        np.fill_diagonal(H, 2)
 
+        for i in range(len(temp)):
+            t = len(temp) / (ngoods * nnodes)
+            start = 0.0
+            for ii in range(nnodes * ngoods):
+                chunk = temp[int(start):int(start+3)]
+                comb = list(combinations(chunk, 2))
+                for item in comb:
+                    H[item[0]][item[1]] = 2
+                    H[item[1]][item[0]] = 2
+                start += t
+
+        print H
+
+
+        c = np.zeros(18)
+        c0 = 8
+        x0 = np.ones(18)
+        cons = ({'type':'ineq', 'fun':lambda x: B - np.dot(A,x)},
+                {'type':'eq', 'fun':lambda x: B2 - np.dot(A2,x)})
+
+        bnds = ((0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None))
+
+        # def fun(x):
+            # return (np.dot(x.T, np.dot(H, x))+ np.dot(c, x) + c0)
+
+        fun = lambda x: 0.5 * np.dot(x.T, np.dot(H, x))+ np.dot(c, x) + c0
+
+        res_cons = optimize.minimize(fun, x0, hess = H, bounds = bnds, constraints=cons)
+
+        print res_cons.x[6]
 
 def main():
     G = nx.Graph()
