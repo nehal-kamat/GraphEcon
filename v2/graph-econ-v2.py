@@ -83,8 +83,8 @@ class Market:
             mat[i] = np.zeros((nnodes, ngoods))
             price_mat[i] = np.zeros((nnodes, ngoods))
             util_mat[i] = np.zeros((nnodes, ngoods))
-            for j in range(nnodes):
-                for k in range(ngoods):
+            for k in range(ngoods):
+                for j in range(nnodes):
                     if adj[i][j] == 1:
                         mat[i][j][k] = endowment[j][k]
                         price_mat[i][j][k] = price_vec[j][k]
@@ -109,6 +109,8 @@ class Market:
         util_rav = [item for sublist in util_rav for item in sublist]
         self.util_rav = util_rav
 
+
+
         def l(i,j,k):
             avg = len(self.end_rav) / nnodes
             countj = j
@@ -129,6 +131,7 @@ class Market:
 
             return counti + countk + countj
 
+
         # func = [(endowment[i][k]**2 - 2*endowment[i][k]*sum([l(j,i,k) for j in range(nnodes)]) + (sum([l(j,i,k) for j in range(nnodes)]))**2) for i in range(nnodes) for k in range(ngoods)]
 
         fun = lambda x: sum([(sum([x[l(j,i,k)] for j in range(nnodes)]))**2 - 2*endowment[i][k]*sum([x[l(j,i,k)] for j in range(nnodes)]) + endowment[i][k]**2 for i in range(nnodes) for k in range(ngoods)])
@@ -140,12 +143,12 @@ class Market:
                 for j in range(nnodes):
                     temp.append(l(j,i,k))
 
-        print temp
+        # print temp
 
         A = np.zeros((nnodes, len(self.end_rav)))
         A2 = np.zeros((nnodes, len(self.end_rav)))
         B = np.array([4.0, 4.0, 4.0])
-        B2 = np.array([-2.0, -2.0, -2.0])
+        B2 = np.array([2.0, 4.0, 2.0])
 
         # print B.shape
 
@@ -161,8 +164,7 @@ class Market:
             A2[i][start : start + div] = self.util_rav[start : start + div]
             start = start + div
 
-        # print A
-        # print A2
+
 
         def hessian(x):
             """
@@ -205,8 +207,8 @@ class Market:
         c = np.zeros(18)
         c0 = 8
         x0 = np.ones(18)
-        cons = ({'type':'ineq', 'fun':lambda x: B - np.dot(A,x)},
-                {'type':'eq', 'fun':lambda x: B2 - np.dot(A2,x)})
+        cons = ({'type':'ineq', 'fun':lambda x: B - np.dot(A,x), 'jac':lambda x: -A},
+                {'type':'eq', 'fun':lambda x: B2 - np.dot(A2,x), 'jac':lambda x: -A2})
 
         bnds = ((0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None), (0, None))
 
@@ -215,9 +217,9 @@ class Market:
 
         fun = lambda x: 0.5 * np.dot(x.T, np.dot(H, x))+ np.dot(c, x) + c0
 
-        res_cons = optimize.minimize(fun, x0, hess = H, bounds = bnds, constraints=cons)
+        res_cons = optimize.minimize(fun, x0, bounds = bnds, constraints=cons)
 
-        print res_cons.x[6]
+        print res_cons
 
 def main():
     G = nx.Graph()
