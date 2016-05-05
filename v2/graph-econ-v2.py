@@ -215,7 +215,7 @@ class Market:
         # def fun(x):
             # return (np.dot(x.T, np.dot(H, x))+ np.dot(c, x) + c0)
 
-        fun = lambda x: 0.5 * np.dot(x.T, np.dot(H, x))+ np.dot(c, x) + c0
+        # fun = lambda x: 0.5 * np.dot(x.T, np.dot(H, x))+ np.dot(c, x) + c0
 
         res_cons = optimize.minimize(fun, x0, bounds = bnds, constraints=cons)
 
