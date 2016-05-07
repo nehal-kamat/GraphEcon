@@ -24,7 +24,6 @@ def main():
     prices = {0:np.array([2,1]), 1:np.array([2,2]), 2:np.array([1,2])}
 
     mkt = Market(G, endowment, utility, ngoods)
-
     mkt.checkClear(prices)
 
 
