@@ -1,6 +1,5 @@
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
 
 from random import random
 from scipy import optimize
@@ -101,9 +100,9 @@ class Market:
                     H[item[1]][item[0]] = 2
                 start += t
 
-        c = np.zeros(18)
+        c = np.zeros(nnodes * nnodes * ngoods)
         c0 = 8
-        x0 = np.ones(18)
+        x0 = np.ones(nnodes * nnodes * ngoods)
         cons = ({'type':'ineq', 'fun':lambda x: B - np.dot(A,x), 'jac':lambda x: -A},
                 {'type':'eq', 'fun':lambda x: B2 - np.dot(A2,x), 'jac':lambda x: -A2})
 
@@ -116,5 +115,11 @@ class Market:
         else:
             print "Distance from equilibrium: {}".format(res_cons.fun)
 
-        print "Optimal plans:",
-        print [format(ii, '.2f') for ii in res_cons.x]
+        for i in self.G:
+            for j in self.G:
+                if adj[i][j] == 1:
+                    for k in range(ngoods):
+                        print "trader: {} | neighbor: {} | good: {} | Optimum purchase : {} units".format(i,j,k,format(res_cons.x[l(i,j,k)], '.1f'))
+            print
+        # print "Optimal plans:",
+        # print [format(ii, '.2f') for ii in res_cons.x]

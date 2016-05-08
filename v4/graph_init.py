@@ -1,5 +1,6 @@
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
 
 from market_status import Market
 from utility import LinearUtility
@@ -10,9 +11,8 @@ def main():
 
     ngoods = 2  # modify according to your preferred number of goods
 
-    # nx.draw(G, with_labels = True)
-    # plt.show()
-    # plt.savefig("InitialGraph.png")
+    nx.draw(G, with_labels = True)
+    plt.savefig("graph1.png")
 
     # modify values according to your preferred {node-label : endowment-per-good vector} configuration
     endowment = {0:np.array([1,2]), 1:np.array([1,1]), 2:np.array([2,1])}
